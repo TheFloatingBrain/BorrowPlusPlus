@@ -34,6 +34,11 @@ Box< DATA_TYPE > MakeInt( DATA_TYPE value )
     }
     FunctionToPassToo( std::move( firstPointer ) );
     FunctionToPassToo( std::move( evenLevelPointer ) );
+    /***********************************************************************
+    * Foot-gun stemming from the move - semantics foot-gun, need to return *
+    * most recently passed pointer. Currently can only be avoided by using *
+    * move semantics like in the code block. *******************************
+    ***********************************************************************/
     return evenLevelPointer;
 }
 

@@ -49,6 +49,7 @@ namespace BorrowBox
             std::allocator >
     struct Box
     {
+        //No floating pointers. This may become optional later, see "Goals".//
         Box() = delete;
         constexpr Box( const Box& other ) : data( other.data ), passed( false ) {
             ( ( Box& ) other ).passed = true;
@@ -94,12 +95,20 @@ namespace BorrowBox
         friend class Borrow< DATA_TYPE, ALLOCATOR_TYPE >;
         private: 
             constexpr Box( DATA_TYPE* data_ ) : data( data_ ), passed( false ) {}
-            DATA_TYPE* data;
             /************************************************
             * TODO: So a nullification will take effect on **
             * all instances, also allows for early deletion.*
             *************************************************/
             //const DATA_TYPE** data;
+            DATA_TYPE* data;
+            /**************************************************************
+            * Essentially if something has been passed then its golden! ***
+            * We know we no longer have to worry about it, something can **
+            * refrence it and the memory is not orphined. However if ******
+            * the memory has not been passed (at least not to another Box)*
+            * the memory could be orphined if this Box is deleted. ********
+            * 'passed' being set to false is basically ownership. *********
+            **************************************************************/
             bool passed = false;
     };
 
