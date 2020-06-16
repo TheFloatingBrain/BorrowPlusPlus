@@ -12,6 +12,9 @@
 *             credit https://github.com/ZisIsNotZis/cppBorrow by ZisIsNotZis *
 *             with that idea. Im basically adding implicit value semantics ***
 *             and garbage collection to his idea. ****************************
+*     * : Allow for thread safe or atomic storage. ***************************
+*     * : Allow for contiguous storage (array/buffer allocation). ************
+*     * : Add stack/compile time allocator. **********************************
 *****************************************************************************/
 
 /*********************************************************************************
