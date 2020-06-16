@@ -1,6 +1,6 @@
 # Borrow++
 
-C++ borrow library with value semantics! NOT ready for use yet!
+C++ borrow library with value semantics! Version 0.00 NOT ready for use yet!
 
 # Goals
 * Add global allocation pool 
