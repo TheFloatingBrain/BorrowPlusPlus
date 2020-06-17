@@ -3,13 +3,14 @@
 C++ borrow library with value semantics! Version 0.00 NOT ready for use yet!
 
 # Goals
-* Add global allocation pool 
-* Use pointer-to-pointer types to allow for ubiquitous nullification, nullable/unnullable semantics patial optional manual memory managment, future garbage collector. 
-* Optional garbage collector. 
-* Fix the one foot-gun (the move semantics) that exists in this library. This may be able to be done via template specialization, instantiating owning/non-owning Boxes. I credit https://github.com/ZisIsNotZis/cppBorrow by ZisIsNotZis with that idea. Im basically adding implicit value semantics and garbage collection to his idea. 
-* Allow for thread safe or atomic storage. 
-* Allow for contiguous storage (array/buffer allocation). 
-* Add stack/compile time allocator. 
+- [ ] Add global allocation pool 
+- [ ] Use pointer-to-pointer types to allow for ubiquitous nullification, nullable/unnullable semantics patial optional manual memory managment, future garbage collector. 
+- [ ] Optional garbage collector. 
+- [x] Fix the one foot-gun (the move semantics) that exists in this library. This may be able to be done via template specialization, instantiating owning/non-owning Boxes. I credit https://github.com/ZisIsNotZis/cppBorrow by ZisIsNotZis with that idea. Im basically adding implicit value semantics and garbage collection to his idea. 
+- [ ] Allow for thread safe or atomic storage. 
+- [ ] Allow for contiguous storage (array/buffer allocation). 
+- [ ] Add stack/compile time allocator. 
+- [ ] Fix the one foot gun where it someone can write Box< DATA_TYPE > instead of OWNED_BOX< DATA_TYPE > when returning from a function.
 
 # Background
 
