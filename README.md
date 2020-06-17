@@ -12,6 +12,8 @@ C++ borrow library with value semantics! Version 0.00 NOT ready for use yet!
 - [ ] Add stack/compile time allocator. 
 - [ ] Fix the one foot gun where it someone can write Box< DATA_TYPE > instead of OWNED_BOX< DATA_TYPE > when returning from a function.
 - [ ] Fix moving and refrencing unowned boxes.
+- [ ] Make borrwing allocator aware.
+- [ ] Make garbage collection allocator aware.
 
 # Background
 

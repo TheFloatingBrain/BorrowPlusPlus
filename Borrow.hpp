@@ -18,6 +18,8 @@
 *     * : Fix the one foot gun where it someone can write Box< DATA_TYPE > ***
 *             instead of OWNED_BOX< DATA_TYPE > when returning from a ********
 *             function. ******************************************************
+*     * : Make borrwing allocator aware. *************************************
+*     * : Make garbage collection allocator aware. ***************************
 *****************************************************************************/
 
 /*********************************************************************************
@@ -167,8 +169,9 @@ namespace BorrowBox
         DATA_TYPE* data = nullptr;
         constexpr Borrow() : data( new DATA_TYPE ) {};
         template< typename... ARGUMENT_TYPES >
-        constexpr Borrow( ARGUMENT_TYPES... arguments ) : 
-                data( new DATA_TYPE( std::forward< ARGUMENT_TYPES >( arguments )... ) ) {}
+        constexpr Borrow( ARGUMENT_TYPES... arguments ) {
+            data = new DATA_TYPE( std::forward< ARGUMENT_TYPES >( arguments )... );
+        }
         constexpr operator Box< DATA_TYPE, Owner::OWNER_ENUMERATION >() {
             return this->ConstructBox( data );
         }
