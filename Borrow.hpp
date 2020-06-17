@@ -36,64 +36,96 @@
 ********************************************************************************/
 
 
-#ifdef BORROW_ENABLE_ATOMIC_MEMORY_eb68f065_567d_437b_9373_9fa3e17e65a8
+#define BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8
+
+#ifdef BORROW_PLUS_PLUS_ENABLE_ATOMIC_MEMORY_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8
     #include <atomic>
 #endif
 
 namespace BorrowBox
 {
-    template< typename DATA_TYPE, template< typename > class ALLOCATOR_TYPE >
-    struct Borrow;
+    enum class Owner : bool {
+        OWNER_ENUMERATION = true, 
+        NOT_OWNER_ENUMERATION = false
+    };
 
-    template< typename DATA_TYPE, template< typename > class ALLOCATOR_TYPE = 
-            std::allocator >
+    namespace Detail {
+        template< typename DATA_TYPE >
+        struct BorrowBase;
+    }
+    #define BORROW_PLUS_PLUS_BOX_COMMON_DEFINITIONS_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( OPERATOR_EQUALS_BODY_PARAMETER ) \
+        constexpr DATA_TYPE& operator*() { \
+            return *data; \
+        } \
+        constexpr DATA_TYPE* operator->() { \
+            return data; \
+        } \
+        constexpr THIS_TYPE& operator=( const Box< DATA_TYPE, Owner::OWNER_ENUMERATION >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( Box< DATA_TYPE, Owner::OWNER_ENUMERATION >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( Box< DATA_TYPE, Owner::OWNER_ENUMERATION > other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr const THIS_TYPE& operator=( Box< DATA_TYPE, Owner::OWNER_ENUMERATION >&& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( const Box< DATA_TYPE, Owner::NOT_OWNER_ENUMERATION >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( Box< DATA_TYPE, Owner::NOT_OWNER_ENUMERATION >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( Box< DATA_TYPE, Owner::NOT_OWNER_ENUMERATION > other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr const THIS_TYPE& operator=( Box< DATA_TYPE, Owner::NOT_OWNER_ENUMERATION >&& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+
+    template< typename DATA_TYPE, Owner IS_OWNER_CONSTANT = Owner::NOT_OWNER_ENUMERATION >
     struct Box
     {
+        using THIS_TYPE = Box< DATA_TYPE, Owner::NOT_OWNER_ENUMERATION >;
+        using OTHER_TYPE = Box< DATA_TYPE, Owner::OWNER_ENUMERATION >;
         //No floating pointers. This may become optional later, see "Goals".//
-        Box() = delete;
-        constexpr Box( const Box& other ) : data( other.data ), passed( false ) {
+        constexpr Box() = delete;
+        constexpr Box( const THIS_TYPE& other ) : data( other.data ) {}
+        constexpr Box( const THIS_TYPE&& other ) : data( other.data ) {};
+        constexpr Box( const OTHER_TYPE& other ) : data( other.data ) {}
+        constexpr Box( const OTHER_TYPE&& other ) : data( other.data ) {}
+        BORROW_PLUS_PLUS_BOX_COMMON_DEFINITIONS_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( { return RefrenceAssign( other ); } )
+        constexpr THIS_TYPE& RefrenceAssign( const THIS_TYPE& other ) {
+            data = other.data;
+            return *this;
+        }
+        constexpr THIS_TYPE& RefrenceAssign( const THIS_TYPE&& other ) {
+            data = other.data;
+            return *this;
+        }
+        constexpr THIS_TYPE& RefrenceAssign( const OTHER_TYPE& other ) {
+            data = other.data;
+            return *this;
+        }
+        constexpr THIS_TYPE& RefrenceAssign( const OTHER_TYPE&& other ) {
+            data = other.data;
+            return *this;
+        }
+        friend OTHER_TYPE;
+        protected: 
+            DATA_TYPE* data;
+    };
+    template< typename DATA_TYPE >
+    struct Box< DATA_TYPE, Owner::OWNER_ENUMERATION >
+    {
+        using THIS_TYPE = Box< DATA_TYPE, Owner::OWNER_ENUMERATION >;
+        using OTHER_TYPE = Box< DATA_TYPE, Owner::NOT_OWNER_ENUMERATION >;
+        //No floating pointers. This may become optional later, see "Goals".//
+        constexpr Box() = delete;
+        constexpr Box( const THIS_TYPE& other ) : data( other.data ), passed( false ) {
             ( ( Box& ) other ).passed = true;
         }
-        constexpr Box( const Box&& other ) : data( other.data ), passed( true ) {}
+        constexpr Box( const THIS_TYPE&& other ) : data( other.data ), passed( false ) {
+            const Box& leftValue = other;
+            ( ( Box& ) leftValue ).passed = true;
+        }
         ~Box() {
             if( passed == false )
                 delete data;
         }
-        constexpr DATA_TYPE& operator*() {
-            return *data;
+        BORROW_PLUS_PLUS_BOX_COMMON_DEFINITIONS_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( = delete; )
+        constexpr operator OTHER_TYPE() {
+            return OTHER_TYPE( *this );
         }
-        constexpr DATA_TYPE* operator->() {
-            return data;
-        }
-        constexpr Box< DATA_TYPE >& RefrenceAssign( const Box< DATA_TYPE >& other )
-        {
-            data = other.data;
-            other.passed = true;
-            passed = false;
-            return *this;
-        }
-
-        constexpr Box< DATA_TYPE >& operator=( const Box< DATA_TYPE >& other ) {
-            return RefrenceAssign( other );
-        }
-
-        constexpr Box< DATA_TYPE >& operator=( Box< DATA_TYPE >& other ) {
-            return RefrenceAssign( other );
-        }
-
-        constexpr Box< DATA_TYPE >& operator=( Box< DATA_TYPE > other ) {
-            return RefrenceAssign( other );
-        }
-
-        constexpr Box< DATA_TYPE >& operator=( Box< DATA_TYPE >&& other )
-        {
-            data = other.data;
-            other.passed = true;
-            passed = true;
-            return *this;
-        }
-        friend class Borrow< DATA_TYPE, ALLOCATOR_TYPE >;
-        private: 
+        friend class Detail::BorrowBase< DATA_TYPE >;
+        friend OTHER_TYPE;
+        protected: 
             constexpr Box( DATA_TYPE* data_ ) : data( data_ ), passed( false ) {}
             /************************************************
             * TODO: So a nullification will take effect on **
@@ -102,7 +134,9 @@ namespace BorrowBox
             //const DATA_TYPE** data;
             DATA_TYPE* data;
             /**************************************************************
-            * Essentially if something has been passed then its golden! ***
+            * Essentially given that we can not change the value of the ***
+            * pointer (not the object the pointer contains -- the pointer *
+            * if something has been passed then its golden! ***************
             * We know we no longer have to worry about it, something can **
             * refrence it and the memory is not orphined. However if ******
             * the memory has not been passed (at least not to another Box)*
@@ -112,17 +146,30 @@ namespace BorrowBox
             bool passed = false;
     };
 
+    template< typename DATA_TYPE >
+    using OWNER_BOX_TYPE = Box< DATA_TYPE, Owner::OWNER_ENUMERATION >;
+
+    namespace Detail
+    {
+        template< typename DATA_TYPE >
+        struct BorrowBase
+        {
+            auto ConstructBox( DATA_TYPE* data ) {
+                return Box< DATA_TYPE, Owner::OWNER_ENUMERATION >( data );       
+            }
+        };
+    }
+
     template< typename DATA_TYPE, template< typename > class ALLOCATOR_TYPE = std::allocator >
-    struct Borrow
+    struct Borrow : public Detail::BorrowBase< DATA_TYPE >
     {
         DATA_TYPE* data = nullptr;
         constexpr Borrow() : data( new DATA_TYPE ) {};
         template< typename... ARGUMENT_TYPES >
         constexpr Borrow( ARGUMENT_TYPES... arguments ) : 
                 data( new DATA_TYPE( std::forward< ARGUMENT_TYPES >( arguments )... ) ) {}
-        friend class Box< DATA_TYPE >;
-        constexpr operator Box< DATA_TYPE >() {
-            return Box< DATA_TYPE >( data );
+        constexpr operator Box< DATA_TYPE, Owner::OWNER_ENUMERATION >() {
+            return this->ConstructBox( data );
         }
     };
 }
