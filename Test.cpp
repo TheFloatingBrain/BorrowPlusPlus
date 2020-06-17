@@ -38,7 +38,6 @@ OWNER_BOX_TYPE< DATA_TYPE > MakeInt( DATA_TYPE value )
     OWNER_BOX_TYPE< DATA_TYPE > firstPointer = Borrow< DATA_TYPE >( value );
     std::cout << "firstPointer: " << *firstPointer << "\n";
     Box< DATA_TYPE > evenLevelPointer = firstPointer;
-    auto otherEvenLevelPointer = firstPointer;
     std::cout << "evenLevelPointer: " << *evenLevelPointer << "\n";
     {
         Box< DATA_TYPE > scopedPointer = firstPointer;

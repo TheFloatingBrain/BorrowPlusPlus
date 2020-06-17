@@ -6,7 +6,7 @@
 *             patial optional manual memory managment, future garbage ********
 *             collector. *****************************************************
 *     * : Optional garbage collector. ****************************************
-*     * : Fix the one foot-gun (the move semantics) that exists **************
+*     X : Fix the one foot-gun (the move semantics) that exists **************
 *             in this library. This may be able to be done via template ******
 *             specialization, instantiating owning/non-owning Boxes. I *******
 *             credit https://github.com/ZisIsNotZis/cppBorrow by ZisIsNotZis *
@@ -15,6 +15,9 @@
 *     * : Allow for thread safe or atomic storage. ***************************
 *     * : Allow for contiguous storage (array/buffer allocation). ************
 *     * : Add stack/compile time allocator. **********************************
+*     * : Fix the one foot gun where it someone can write Box< DATA_TYPE > ***
+*             instead of OWNED_BOX< DATA_TYPE > when returning from a ********
+*             function. ******************************************************
 *****************************************************************************/
 
 /*********************************************************************************
@@ -108,9 +111,7 @@ namespace BorrowBox
         using OTHER_TYPE = Box< DATA_TYPE, Owner::NOT_OWNER_ENUMERATION >;
         //No floating pointers. This may become optional later, see "Goals".//
         constexpr Box() = delete;
-        constexpr Box( const THIS_TYPE& other ) : data( other.data ), passed( false ) {
-            ( ( Box& ) other ).passed = true;
-        }
+        constexpr Box( const THIS_TYPE& other ) = delete;
         constexpr Box( const THIS_TYPE&& other ) : data( other.data ), passed( false ) {
             const Box& leftValue = other;
             ( ( Box& ) leftValue ).passed = true;
