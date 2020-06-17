@@ -11,6 +11,7 @@ C++ borrow library with value semantics! Version 0.00 NOT ready for use yet!
 - [ ] Allow for contiguous storage (array/buffer allocation). 
 - [ ] Add stack/compile time allocator. 
 - [ ] Fix the one foot gun where it someone can write Box< DATA_TYPE > instead of OWNED_BOX< DATA_TYPE > when returning from a function.
+- [ ] Fix moving and refrencing unowned boxes.
 
 # Background
 
@@ -39,51 +40,58 @@ struct TestStruct
 };
 
 template< typename DATA_TYPE >
-void FunctionToPassToo( Box< DATA_TYPE >&& from ) {
+void FunctionToPassToo( Box< DATA_TYPE, Owner::NOT_OWNER_ENUMERATION > from ) {
     std::cout << "Passed value: " << *from << "\n";
 }
 
-void FunctionToPassToo( Box< TestStruct >&& from ) {
+
+/***************************
+* TODO: Get this working. **
+***************************/
+
+/*template< typename DATA_TYPE >
+void FunctionToPassToo( Box< DATA_TYPE, Owner::NOT_OWNER_ENUMERATION >&& from ) {
+    std::cout << "Passed value: " << *from << "\n";
+}*/
+
+
+void FunctionToPassToo( Box< TestStruct, Owner::NOT_OWNER_ENUMERATION >&& from ) {
     std::cout << "Passed value: " << from->value << "\n";
 }
 
+//The one problem with this library is that 
 template< typename DATA_TYPE >
-Box< DATA_TYPE > MakeInt( DATA_TYPE value )
+OWNER_BOX_TYPE< DATA_TYPE > MakeInt( DATA_TYPE value )
 {
-    Box< DATA_TYPE > firstPointer = Borrow< DATA_TYPE >( value );
+    OWNER_BOX_TYPE< DATA_TYPE > firstPointer = Borrow< DATA_TYPE >( value );
     std::cout << "firstPointer: " << *firstPointer << "\n";
     Box< DATA_TYPE > evenLevelPointer = firstPointer;
     std::cout << "evenLevelPointer: " << *evenLevelPointer << "\n";
     {
-        Box< DATA_TYPE > scopedPointer = std::move( firstPointer );
+        Box< DATA_TYPE > scopedPointer = firstPointer;
         std::cout << "scopedPointer: " << *scopedPointer << "\n";
         FunctionToPassToo( std::move( scopedPointer ) );
     }
-    FunctionToPassToo( std::move( firstPointer ) );
+    FunctionToPassToo( ( Box< DATA_TYPE > ) firstPointer );
     FunctionToPassToo( std::move( evenLevelPointer ) );
-    /***********************************************************************
-    * Foot-gun stemming from the move - semantics foot-gun, need to return *
-    * most recently passed pointer. Currently can only be avoided by using *
-    * move semantics like in the code block. *******************************
-    ***********************************************************************/
-    return evenLevelPointer;
+    return firstPointer;
 }
 
 int main( int argc, char** args )
 {
     int value = 0;
-    std::cout <<
+    std::cout << 
             "Please enter a value to allocate inside a "
             "function but not use outside that function.\n";
     std::cin >> value;
     MakeInt( value );
-    std::cout <<
+    std::cout << 
             "Please enter a value to allocate inside a fucntion"
             "then USE outside that function.\n";
     std::cin >> value;
     auto outPointer = MakeInt( value );
     std::cout << "outPointer: " << *outPointer << "\n";
-    Box< TestStruct > structPointer = Borrow< TestStruct >{};
+    Box< TestStruct, Owner::OWNER_ENUMERATION > structPointer = Borrow< TestStruct >{};
     std::cout << "Please enter a test value to demonstrate Boxing classes/structs.\n";
     std::cin >> structPointer->value;
     structPointer->PrintValue();
