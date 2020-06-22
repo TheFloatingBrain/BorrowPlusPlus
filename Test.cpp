@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Borrow.hpp"
 
-using namespace BorrowBox;
+using namespace BorrowPlusPlus;
 
 struct TestStruct
 {
@@ -11,41 +11,41 @@ struct TestStruct
     }
 };
 
+
 template< typename DATA_TYPE >
-void FunctionToPassToo( Box< DATA_TYPE, Owner::NOT_OWNER_ENUMERATION > from ) {
+void FunctionToPassToo( Refrence< DATA_TYPE > from ) {
     std::cout << "Passed value: " << *from << "\n";
 }
-
 
 /***************************
 * TODO: Get this working. **
 ***************************/
 
-/*template< typename DATA_TYPE >
-void FunctionToPassToo( Box< DATA_TYPE, Owner::NOT_OWNER_ENUMERATION >&& from ) {
+template< typename DATA_TYPE >
+void FunctionToPassToo( Box< DATA_TYPE >&& from ) {
     std::cout << "Passed value: " << *from << "\n";
-}*/
+}
 
 
-void FunctionToPassToo( Box< TestStruct, Owner::NOT_OWNER_ENUMERATION >&& from ) {
+void FunctionToPassToo( Box< TestStruct >&& from ) {
     std::cout << "Passed value: " << from->value << "\n";
 }
 
 //The one problem with this library is that 
 template< typename DATA_TYPE >
-OWNER_BOX_TYPE< DATA_TYPE > MakeInt( DATA_TYPE value )
+Box< DATA_TYPE > MakeInt( DATA_TYPE value )
 {
-    OWNER_BOX_TYPE< DATA_TYPE > firstPointer = Borrow< DATA_TYPE >( value );
+    Box< DATA_TYPE > firstPointer = Borrow< DATA_TYPE >( value );
     std::cout << "firstPointer: " << *firstPointer << "\n";
-    Box< DATA_TYPE > evenLevelPointer = firstPointer;
+    Refrence< DATA_TYPE > evenLevelPointer = firstPointer;
     std::cout << "evenLevelPointer: " << *evenLevelPointer << "\n";
     {
-        Box< DATA_TYPE > scopedPointer = firstPointer;
+        Refrence< DATA_TYPE > scopedPointer = firstPointer;
         std::cout << "scopedPointer: " << *scopedPointer << "\n";
-        FunctionToPassToo( std::move( scopedPointer ) );
+        FunctionToPassToo( scopedPointer );
     }
-    FunctionToPassToo( ( Box< DATA_TYPE > ) firstPointer );
-    FunctionToPassToo( std::move( evenLevelPointer ) );
+    FunctionToPassToo( std::move( firstPointer ) );
+    FunctionToPassToo( evenLevelPointer );
     return firstPointer;
 }
 
@@ -63,7 +63,7 @@ int main( int argc, char** args )
     std::cin >> value;
     auto outPointer = MakeInt( value );
     std::cout << "outPointer: " << *outPointer << "\n";
-    Box< TestStruct, Owner::OWNER_ENUMERATION > structPointer = Borrow< TestStruct >{};
+    Box< TestStruct > structPointer = Borrow< TestStruct >{};
     std::cout << "Please enter a test value to demonstrate Boxing classes/structs.\n";
     std::cin >> structPointer->value;
     structPointer->PrintValue();

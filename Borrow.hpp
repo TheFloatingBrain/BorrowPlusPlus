@@ -47,7 +47,7 @@
     #include <atomic>
 #endif
 
-namespace BorrowBox
+namespace BorrowPlusPlus
 {
     enum class Owner : bool {
         OWNER_ENUMERATION = true, 
@@ -58,59 +58,43 @@ namespace BorrowBox
         template< typename DATA_TYPE >
         struct BorrowBase;
     }
-    #define BORROW_PLUS_PLUS_BOX_COMMON_DEFINITIONS_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( OPERATOR_EQUALS_BODY_PARAMETER ) \
+
+    template< typename DATA_TYPE >
+    class Refrence;
+
+    template< typename DATA_TYPE >
+    class Borrower;
+
+    #define BORROW_PLUS_PLUS_CORE_REFRENCE_OPERATORS_COMMON_DEFINITIONS_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8 \
         constexpr DATA_TYPE& operator*() { \
             return *data; \
         } \
         constexpr DATA_TYPE* operator->() { \
             return data; \
-        } \
-        constexpr THIS_TYPE& operator=( const Box< DATA_TYPE, Owner::OWNER_ENUMERATION >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
-        constexpr THIS_TYPE& operator=( Box< DATA_TYPE, Owner::OWNER_ENUMERATION >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
-        constexpr THIS_TYPE& operator=( Box< DATA_TYPE, Owner::OWNER_ENUMERATION > other ) OPERATOR_EQUALS_BODY_PARAMETER \
-        constexpr const THIS_TYPE& operator=( Box< DATA_TYPE, Owner::OWNER_ENUMERATION >&& other ) OPERATOR_EQUALS_BODY_PARAMETER \
-        constexpr THIS_TYPE& operator=( const Box< DATA_TYPE, Owner::NOT_OWNER_ENUMERATION >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
-        constexpr THIS_TYPE& operator=( Box< DATA_TYPE, Owner::NOT_OWNER_ENUMERATION >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
-        constexpr THIS_TYPE& operator=( Box< DATA_TYPE, Owner::NOT_OWNER_ENUMERATION > other ) OPERATOR_EQUALS_BODY_PARAMETER \
-        constexpr const THIS_TYPE& operator=( Box< DATA_TYPE, Owner::NOT_OWNER_ENUMERATION >&& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        }
+    #define BORROW_PLUS_PLUS_CORE_ASSIGNMENT_COMMON_DEFINITIONS_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( OPERATOR_EQUALS_BODY_PARAMETER ) \
+        constexpr THIS_TYPE& operator=( const Box< DATA_TYPE >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( Box< DATA_TYPE >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( Box< DATA_TYPE > other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( Box< DATA_TYPE >&& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( const Box< DATA_TYPE >&& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        /**************************************************************************************************/ \
+        constexpr THIS_TYPE& operator=( const Refrence< DATA_TYPE >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( Refrence< DATA_TYPE >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( Refrence< DATA_TYPE > other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( Refrence< DATA_TYPE >&& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( const Refrence< DATA_TYPE >&& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        /**************************************************************************************************/ \
+        constexpr THIS_TYPE& operator=( const Borrower< DATA_TYPE >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( Borrower< DATA_TYPE >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( Borrower< DATA_TYPE > other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( Borrower< DATA_TYPE >&& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( const Borrower< DATA_TYPE >&& other ) OPERATOR_EQUALS_BODY_PARAMETER
 
-    template< typename DATA_TYPE, Owner IS_OWNER_CONSTANT = Owner::NOT_OWNER_ENUMERATION >
+    template< typename DATA_TYPE >
     struct Box
     {
-        using THIS_TYPE = Box< DATA_TYPE, Owner::NOT_OWNER_ENUMERATION >;
-        using OTHER_TYPE = Box< DATA_TYPE, Owner::OWNER_ENUMERATION >;
-        //No floating pointers. This may become optional later, see "Goals".//
-        constexpr Box() = delete;
-        constexpr Box( const THIS_TYPE& other ) : data( other.data ) {}
-        constexpr Box( const THIS_TYPE&& other ) : data( other.data ) {};
-        constexpr Box( const OTHER_TYPE& other ) : data( other.data ) {}
-        constexpr Box( const OTHER_TYPE&& other ) : data( other.data ) {}
-        BORROW_PLUS_PLUS_BOX_COMMON_DEFINITIONS_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( { return RefrenceAssign( other ); } )
-        constexpr THIS_TYPE& RefrenceAssign( const THIS_TYPE& other ) {
-            data = other.data;
-            return *this;
-        }
-        constexpr THIS_TYPE& RefrenceAssign( const THIS_TYPE&& other ) {
-            data = other.data;
-            return *this;
-        }
-        constexpr THIS_TYPE& RefrenceAssign( const OTHER_TYPE& other ) {
-            data = other.data;
-            return *this;
-        }
-        constexpr THIS_TYPE& RefrenceAssign( const OTHER_TYPE&& other ) {
-            data = other.data;
-            return *this;
-        }
-        friend OTHER_TYPE;
-        protected: 
-            DATA_TYPE* data;
-    };
-    template< typename DATA_TYPE >
-    struct Box< DATA_TYPE, Owner::OWNER_ENUMERATION >
-    {
-        using THIS_TYPE = Box< DATA_TYPE, Owner::OWNER_ENUMERATION >;
-        using OTHER_TYPE = Box< DATA_TYPE, Owner::NOT_OWNER_ENUMERATION >;
+        using THIS_TYPE = Box< DATA_TYPE >;
         //No floating pointers. This may become optional later, see "Goals".//
         constexpr Box() = delete;
         constexpr Box( const THIS_TYPE& other ) = delete;
@@ -122,12 +106,16 @@ namespace BorrowBox
             if( passed == false )
                 delete data;
         }
-        BORROW_PLUS_PLUS_BOX_COMMON_DEFINITIONS_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( = delete; )
-        constexpr operator OTHER_TYPE() {
-            return OTHER_TYPE( *this );
+        BORROW_PLUS_PLUS_CORE_ASSIGNMENT_COMMON_DEFINITIONS_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( = delete; )
+
+        BORROW_PLUS_PLUS_CORE_REFRENCE_OPERATORS_COMMON_DEFINITIONS_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8
+
+        constexpr operator Refrence< DATA_TYPE >() {
+            return Refrence< DATA_TYPE >{ *this };
         }
+
         friend class Detail::BorrowBase< DATA_TYPE >;
-        friend OTHER_TYPE;
+        friend class Refrence< DATA_TYPE >;
         protected: 
             constexpr Box( DATA_TYPE* data_ ) : data( data_ ), passed( false ) {}
             /************************************************
@@ -150,15 +138,104 @@ namespace BorrowBox
     };
 
     template< typename DATA_TYPE >
-    using OWNER_BOX_TYPE = Box< DATA_TYPE, Owner::OWNER_ENUMERATION >;
+    struct Borrower
+    {
+        using THIS_TYPE = Borrower< DATA_TYPE >;
+        constexpr Borrower() = delete;
+        constexpr Borrower( const THIS_TYPE& other ) = delete;
+        constexpr Borrower( const THIS_TYPE&& other ) : data( other.data ), owns( true ) {
+            const THIS_TYPE& leftValue = other;
+            other.owns = false;
+        }
+        ~Borrower() {
+            if( owns == true )
+                delete data;
+        }
 
+        constexpr DATA_TYPE& operator*()
+        {
+            static_assert( owns == true, 
+                    "Borrow++::Error::Borrower::DATA_TYPE& operator*(): Attempt to refrence data "
+                    "when borrower doesent own the data.\n" );
+            return *data;
+        }
+        constexpr DATA_TYPE* operator->()
+        {
+            static_assert( owns == true, 
+                    "Borrow++::Error::Borrower::DATA_TYPE& operator->(): Attempt to refrence data "
+                    "when borrower doesent own the data.\n" );
+            return data;
+        }
+
+        constexpr operator Refrence< DATA_TYPE >()
+        {
+            static_assert( owns == true, 
+                    "Borrow++::Error::Borrower::operator Refrence(): Attempt to refrence data "
+                    "when borrower doesent own the data.\n" );
+            return Refrence< DATA_TYPE >{ *this };
+        }
+
+        BORROW_PLUS_PLUS_CORE_ASSIGNMENT_COMMON_DEFINITIONS_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( = delete; )
+
+        friend class Detail::BorrowBase< DATA_TYPE >;
+        friend class Refrence< DATA_TYPE >;
+        
+        protected: 
+            constexpr Borrower( DATA_TYPE* data_ ) : data( data_ ), owns( true ) {}
+            DATA_TYPE* data;
+            bool owns = false;
+    };
+
+    template< typename DATA_TYPE >
+    struct Refrence
+    {
+        using THIS_TYPE = Refrence< DATA_TYPE >;
+        //No floating pointers. This may become optional later, see "Goals".//
+        constexpr Refrence() = delete;
+        constexpr Refrence( const THIS_TYPE& other ) : data( other.data ) {}
+        constexpr Refrence( const THIS_TYPE&& other ) : data( other.data ) {};
+        constexpr Refrence( const Box< DATA_TYPE >& other ) : data( other.data ) {}
+        constexpr Refrence( const Box< DATA_TYPE >&& other ) : data( other.data ) {}
+        constexpr Refrence( const Borrower< DATA_TYPE >& other ) : data( other.data ) {}
+        constexpr Refrence( const Borrower< DATA_TYPE >&& other ) : data( other.data ) {}
+        BORROW_PLUS_PLUS_CORE_ASSIGNMENT_COMMON_DEFINITIONS_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( { return RefrenceAssign( other ); } )
+        BORROW_PLUS_PLUS_CORE_REFRENCE_OPERATORS_COMMON_DEFINITIONS_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8
+        #define NAMESPACE_BORROW_CLASS_REFRENCE_REFRENCE_ASSIGN_FOR_TYPE_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( FROM_TYPE_PARAMETER ) \
+            NAMESPACE_BORROW_CLASS_REFRENCE_REFRENCE_ASSIGN_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( FROM_TYPE_PARAMETER, /**/ ) \
+            NAMESPACE_BORROW_CLASS_REFRENCE_REFRENCE_ASSIGN_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( FROM_TYPE_PARAMETER, & ) \
+            NAMESPACE_BORROW_CLASS_REFRENCE_REFRENCE_ASSIGN_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( FROM_TYPE_PARAMETER, && ) \
+
+        #define NAMESPACE_BORROW_CLASS_REFRENCE_REFRENCE_ASSIGN_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( FROM_TYPE_PARAMETER, MODIFIER_PARAMETER ) \
+            constexpr THIS_TYPE& RefrenceAssign( const FROM_TYPE_PARAMETER MODIFIER_PARAMETER other ) { \
+                data = other.data; \
+                return *this; \
+            }
+        
+        NAMESPACE_BORROW_CLASS_REFRENCE_REFRENCE_ASSIGN_FOR_TYPE_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( Refrence< DATA_TYPE > )
+        NAMESPACE_BORROW_CLASS_REFRENCE_REFRENCE_ASSIGN_FOR_TYPE_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( Box< DATA_TYPE > )
+        NAMESPACE_BORROW_CLASS_REFRENCE_REFRENCE_ASSIGN_FOR_TYPE_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( Borrower< DATA_TYPE > )
+
+        friend class Box< DATA_TYPE >;
+        friend class Borrower< DATA_TYPE >;
+        protected: 
+            DATA_TYPE* data;
+    };
+
+    #ifdef SHORT_NAMES_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8
+        template< typename DATA_TYPE >
+        using Ref< DATA_TYPE >= Refrence< DATA_TYPE >;
+    #endif
+    
     namespace Detail
     {
         template< typename DATA_TYPE >
         struct BorrowBase
         {
-            auto ConstructBox( DATA_TYPE* data ) {
-                return Box< DATA_TYPE, Owner::OWNER_ENUMERATION >( data );       
+            constexpr auto ConstructBox( DATA_TYPE* data ) {
+                return Box< DATA_TYPE >{ data };       
+            }
+            constexpr auto ConstructBorrower( DATA_TYPE* data ) {
+                return Borrower< DATA_TYPE >{ data };       
             }
         };
     }
@@ -172,8 +249,11 @@ namespace BorrowBox
         constexpr Borrow( ARGUMENT_TYPES... arguments ) {
             data = new DATA_TYPE( std::forward< ARGUMENT_TYPES >( arguments )... );
         }
-        constexpr operator Box< DATA_TYPE, Owner::OWNER_ENUMERATION >() {
+        constexpr operator Box< DATA_TYPE >() {
             return this->ConstructBox( data );
+        }
+        constexpr operator Borrower< DATA_TYPE >() {
+            return this->ConstructBorrower( data );
         }
     };
 }
