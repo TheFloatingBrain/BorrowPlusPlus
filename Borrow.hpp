@@ -49,11 +49,6 @@
 
 namespace BorrowPlusPlus
 {
-    enum class Owner : bool {
-        OWNER_ENUMERATION = true, 
-        NOT_OWNER_ENUMERATION = false
-    };
-
     namespace Detail {
         template< typename DATA_TYPE >
         struct BorrowBase;
@@ -95,6 +90,12 @@ namespace BorrowPlusPlus
     struct Box
     {
         using THIS_TYPE = Box< DATA_TYPE >;
+
+        template< typename... INITIALIZATION_ARGUMENTS >
+        constexpr Box( INITIALIZATION_ARGUMENTS... initializationArguments ) : data( 
+                new DATA_TYPE( std::forward< INITIALIZATION_ARGUMENTS >( initializationArguments )... ) ), 
+                passed( false ) {}
+
         //No floating pointers. This may become optional later, see "Goals".//
         constexpr Box() = delete;
         constexpr Box( const THIS_TYPE& other ) = delete;
@@ -117,7 +118,7 @@ namespace BorrowPlusPlus
         friend class Detail::BorrowBase< DATA_TYPE >;
         friend class Refrence< DATA_TYPE >;
         protected: 
-            constexpr Box( DATA_TYPE* data_ ) : data( data_ ), passed( false ) {}
+        //    constexpr Box( DATA_TYPE* data_ ) : data( data_ ), passed( false ) {}
             /************************************************
             * TODO: So a nullification will take effect on **
             * all instances, also allows for early deletion.*
@@ -137,41 +138,44 @@ namespace BorrowPlusPlus
             bool passed = false;
     };
 
+
+
     template< typename DATA_TYPE >
     struct Borrower
     {
         using THIS_TYPE = Borrower< DATA_TYPE >;
-        constexpr Borrower() = delete;
+
+        Borrower() = delete;
         constexpr Borrower( const THIS_TYPE& other ) = delete;
-        constexpr Borrower( const THIS_TYPE&& other ) : data( other.data ), owns( true ) {
+        constexpr Borrower( const THIS_TYPE&& other ) : data( other.data ), owns( true )
+        {
+            //static_assert( other.owns == true, "Borrow++::Error::Borrower::Borrower( const Borrower&& ): Attempt to pass "
+            //        "data/ownership when borrower does not own the data.\n" );
             const THIS_TYPE& leftValue = other;
-            other.owns = false;
+            ( ( THIS_TYPE& ) other ).owns = false;
         }
-        ~Borrower() {
+        constexpr ~Borrower() {
             if( owns == true )
                 delete data;
         }
 
         constexpr DATA_TYPE& operator*()
         {
-            static_assert( owns == true, 
-                    "Borrow++::Error::Borrower::DATA_TYPE& operator*(): Attempt to refrence data "
-                    "when borrower doesent own the data.\n" );
+            //static_assert( owns == true, "Borrow++::Error::Borrower::DATA_TYPE& operator*(): Attempt to refrence data "
+            //        "when borrower doesent own the data.\n" );
             return *data;
         }
         constexpr DATA_TYPE* operator->()
         {
-            static_assert( owns == true, 
-                    "Borrow++::Error::Borrower::DATA_TYPE& operator->(): Attempt to refrence data "
-                    "when borrower doesent own the data.\n" );
+            //static_assert( owns == true, "Borrow++::Error::Borrower::DATA_TYPE& operator->(): Attempt to refrence data "
+            //        "when borrower doesent own the data.\n" );
             return data;
         }
 
         constexpr operator Refrence< DATA_TYPE >()
         {
-            static_assert( owns == true, 
-                    "Borrow++::Error::Borrower::operator Refrence(): Attempt to refrence data "
-                    "when borrower doesent own the data.\n" );
+            //static_assert( owns == true, "Borrow++::Error::Borrower::operator Refrence(): Attempt to refrence data "
+            //        "when borrower doesent own the data.\n" );
             return Refrence< DATA_TYPE >{ *this };
         }
 
@@ -193,7 +197,7 @@ namespace BorrowPlusPlus
         //No floating pointers. This may become optional later, see "Goals".//
         constexpr Refrence() = delete;
         constexpr Refrence( const THIS_TYPE& other ) : data( other.data ) {}
-        constexpr Refrence( const THIS_TYPE&& other ) : data( other.data ) {};
+        constexpr Refrence( const THIS_TYPE&& other ) : data( other.data ) {}
         constexpr Refrence( const Box< DATA_TYPE >& other ) : data( other.data ) {}
         constexpr Refrence( const Box< DATA_TYPE >&& other ) : data( other.data ) {}
         constexpr Refrence( const Borrower< DATA_TYPE >& other ) : data( other.data ) {}
