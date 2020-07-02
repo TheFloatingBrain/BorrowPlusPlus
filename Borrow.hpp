@@ -143,14 +143,6 @@ namespace BorrowPlusPlus
     template< typename DATA_TYPE, bool OWNS_CONSTANT = true >
     struct Borrower
     {
-<<<<<<< HEAD
-        using THIS_TYPE = Borrower< DATA_TYPE, true >;
-
-        Borrower() = delete;
-        constexpr Borrower( const THIS_TYPE&& other ) : data( other.data ) {}
-        constexpr ~Borrower() {
-            delete data;
-=======
         using THIS_TYPE = Borrower< DATA_TYPE >;
         constexpr Borrower() = delete;
         constexpr Borrower( const THIS_TYPE& other ) = delete;
@@ -161,7 +153,6 @@ namespace BorrowPlusPlus
         ~Borrower() {
             if( owns == true )
                 delete data;
->>>>>>> parent of 5fe8af5... About to make another big change to mechanichs
         }
 
         constexpr DATA_TYPE& operator*()
