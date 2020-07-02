@@ -13,10 +13,15 @@ void FunctionToPassToo( Borrower< DATA_TYPE > from ) {
 template< typename DATA_TYPE >
 /*Borrower< DATA_TYPE > */ void BorrowData( const DATA_TYPE value )
 {
-    Borrower< DATA_TYPE > firstPointer = Borrow< DATA_TYPE >{ value };
-    std::cout << "firstPointer: " << *firstPointer << "\n";
-    FunctionToPassToo< int >( firstPointer );
-    std::cout << "firstPointer again: " << *firstPointer << "\n";
+    BorrowPointer< DATA_TYPE > meep{ Borrow< DATA_TYPE >{ value } };
+    std::cout << "Derp: " << *meep << "\n";
+    //meep.owns = false;
+    (*meep);
+    //std::cout << "Herp: " << val << "\n";
+    //Borrower< DATA_TYPE > firstPointer = Borrow< DATA_TYPE >{ value };
+    //std::cout << "firstPointer: " << *firstPointer << "\n";
+    //FunctionToPassToo< int >( firstPointer );
+    //std::cout << "firstPointer again: " << *firstPointer << "\n";
     /*constexpr Refrence< DATA_TYPE > evenLevelPointer = firstPointer;
     std::cout << "evenLevelPointer: " << *evenLevelPointer << "\n";
     {

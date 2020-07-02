@@ -57,7 +57,7 @@ namespace BorrowPlusPlus
     template< typename DATA_TYPE >
     class Refrence;
 
-    template< typename DATA_TYPE >
+    template< typename DATA_TYPE, bool OWNS_CONSTANT >
     class Borrower;
 
     #define BORROW_PLUS_PLUS_CORE_REFRENCE_OPERATORS_COMMON_DEFINITIONS_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8 \
@@ -78,13 +78,13 @@ namespace BorrowPlusPlus
         constexpr THIS_TYPE& operator=( Refrence< DATA_TYPE >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
         constexpr THIS_TYPE& operator=( Refrence< DATA_TYPE > other ) OPERATOR_EQUALS_BODY_PARAMETER \
         constexpr THIS_TYPE& operator=( Refrence< DATA_TYPE >&& other ) OPERATOR_EQUALS_BODY_PARAMETER \
-        constexpr THIS_TYPE& operator=( const Refrence< DATA_TYPE >&& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        constexpr THIS_TYPE& operator=( const Refrence< DATA_TYPE >&& other ) OPERATOR_EQUALS_BODY_PARAMETER //\
         /**************************************************************************************************/ \
-        constexpr THIS_TYPE& operator=( const Borrower< DATA_TYPE >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
+        /*constexpr THIS_TYPE& operator=( const Borrower< DATA_TYPE >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
         constexpr THIS_TYPE& operator=( Borrower< DATA_TYPE >& other ) OPERATOR_EQUALS_BODY_PARAMETER \
         constexpr THIS_TYPE& operator=( Borrower< DATA_TYPE > other ) OPERATOR_EQUALS_BODY_PARAMETER \
         constexpr THIS_TYPE& operator=( Borrower< DATA_TYPE >&& other ) OPERATOR_EQUALS_BODY_PARAMETER \
-        constexpr THIS_TYPE& operator=( const Borrower< DATA_TYPE >&& other ) OPERATOR_EQUALS_BODY_PARAMETER
+        constexpr THIS_TYPE& operator=( const Borrower< DATA_TYPE >&& other ) OPERATOR_EQUALS_BODY_PARAMETER*/
 
     template< typename DATA_TYPE >
     struct Box
@@ -138,25 +138,18 @@ namespace BorrowPlusPlus
             bool passed = false;
     };
 
-
-
     template< typename DATA_TYPE >
+    struct BorrowPointer;
+
+    template< typename DATA_TYPE, bool OWNS_CONSTANT = true >
     struct Borrower
     {
-        using THIS_TYPE = Borrower< DATA_TYPE >;
+        using THIS_TYPE = Borrower< DATA_TYPE, true >;
 
         Borrower() = delete;
-        constexpr Borrower( const THIS_TYPE& other ) = delete;
-        constexpr Borrower( const THIS_TYPE&& other ) : data( other.data ), owns( true )
-        {
-            //static_assert( other.owns == true, "Borrow++::Error::Borrower::Borrower( const Borrower&& ): Attempt to pass "
-            //        "data/ownership when borrower does not own the data.\n" );
-            const THIS_TYPE& leftValue = other;
-            ( ( THIS_TYPE& ) other ).owns = false;
-        }
+        constexpr Borrower( const THIS_TYPE&& other ) : data( other.data ) {}
         constexpr ~Borrower() {
-            if( owns == true )
-                delete data;
+            delete data;
         }
 
         constexpr DATA_TYPE& operator*()
@@ -183,11 +176,75 @@ namespace BorrowPlusPlus
 
         friend class Detail::BorrowBase< DATA_TYPE >;
         friend class Refrence< DATA_TYPE >;
-        
+        friend class BorrowPointer< DATA_TYPE >;
         protected: 
-            constexpr Borrower( DATA_TYPE* data_ ) : data( data_ ), owns( true ) {}
+            constexpr Borrower( DATA_TYPE* data_ ) : data( data_ ) {}
+            Borrower( const THIS_TYPE& other ) : data( other.data ) {}
             DATA_TYPE* data;
-            bool owns = false;
+    };
+    
+
+
+    template< typename DATA_TYPE >
+    struct Borrower< DATA_TYPE, false >
+    {
+        using THIS_TYPE = Borrower< DATA_TYPE, false >;
+        constexpr DATA_TYPE* operator*()
+        {
+            static_assert( false, "Borrow++::Error::Borrower::DATA_TYPE& operator*(): Attempt to refrence data "
+                    "when borrower doesent own the data.\n" );
+            return nullptr;
+        }
+        constexpr DATA_TYPE* operator->()
+        {
+            static_assert( false, "Borrow++::Error::Borrower::DATA_TYPE& operator->(): Attempt to refrence data "
+                    "when borrower doesent own the data.\n" );
+            return nullptr;
+        }
+
+        constexpr operator Refrence< DATA_TYPE >()
+        {
+            static_assert( false, "Borrow++::Error::Borrower::operator Refrence(): Attempt to refrence data "
+                    "when borrower doesent own the data.\n" );
+            return Refrence< DATA_TYPE >{};
+        }
+        BORROW_PLUS_PLUS_CORE_ASSIGNMENT_COMMON_DEFINITIONS_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( = delete; )
+        friend class BorrowPointer< DATA_TYPE >;
+        protected: 
+            constexpr Borrower() {}
+            constexpr Borrower( Borrower< DATA_TYPE, false >& other ) {}
+    };
+
+    template< typename DATA_TYPE >
+    struct BorrowPointer
+    {
+        constexpr DATA_TYPE& operator*()
+        {
+            if( owns == true ) {
+                std::cout << "A\n";
+                return borrower.operator*();
+            }
+            std::cout << "B\n";
+            return *errorGenerator.operator*();
+        }
+        constexpr DATA_TYPE* operator->()
+        {
+            if( owns == true )
+                return borrower.operator->();
+            return errorGenerator.operator*();
+        }
+
+        constexpr operator Refrence< DATA_TYPE >()
+        {
+            if( owns == true )
+                return borrower.operator Refrence< DATA_TYPE >();
+            return errorGenerator.operator Refrence< DATA_TYPE >();
+        }
+        //protected: 
+            constexpr BorrowPointer( Borrower< DATA_TYPE, true > borrower_ ) : borrower( borrower_ ), owns( true ) {}
+            Borrower< DATA_TYPE, true > borrower;
+            Borrower< DATA_TYPE, false > errorGenerator;
+            bool owns;
     };
 
     template< typename DATA_TYPE >
@@ -195,7 +252,6 @@ namespace BorrowPlusPlus
     {
         using THIS_TYPE = Refrence< DATA_TYPE >;
         //No floating pointers. This may become optional later, see "Goals".//
-        constexpr Refrence() = delete;
         constexpr Refrence( const THIS_TYPE& other ) : data( other.data ) {}
         constexpr Refrence( const THIS_TYPE&& other ) : data( other.data ) {}
         constexpr Refrence( const Box< DATA_TYPE >& other ) : data( other.data ) {}
@@ -220,8 +276,10 @@ namespace BorrowPlusPlus
         NAMESPACE_BORROW_CLASS_REFRENCE_REFRENCE_ASSIGN_FOR_TYPE_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8( Borrower< DATA_TYPE > )
 
         friend class Box< DATA_TYPE >;
-        friend class Borrower< DATA_TYPE >;
+        friend class Borrower< DATA_TYPE, true >;
+        friend class Borrower< DATA_TYPE, false >;
         protected: 
+            constexpr Refrence() {}
             DATA_TYPE* data;
     };
 
@@ -239,7 +297,7 @@ namespace BorrowPlusPlus
                 return Box< DATA_TYPE >{ data };       
             }
             constexpr auto ConstructBorrower( DATA_TYPE* data ) {
-                return Borrower< DATA_TYPE >{ data };       
+                return Borrower< DATA_TYPE, true >{ data };       
             }
         };
     }
