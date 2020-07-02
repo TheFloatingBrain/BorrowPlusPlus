@@ -40,6 +40,9 @@
 * a great job and I "borrowed" (heh') a few ideas from there. *******************
 ********************************************************************************/
 
+#include <optional>
+#include <functional>
+#include <cassert>
 
 #define BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8
 
@@ -138,9 +141,6 @@ namespace BorrowPlusPlus
     };
 
     template< typename DATA_TYPE >
-    struct BorrowPointer;
-
-    template< typename DATA_TYPE >
     struct Borrower
     {
         using THIS_TYPE = Borrower< DATA_TYPE >;
@@ -148,33 +148,27 @@ namespace BorrowPlusPlus
         constexpr Borrower( const THIS_TYPE& other ) = delete;
         constexpr Borrower( const THIS_TYPE&& other ) : data( other.data ), owns( true ) {
             const THIS_TYPE& leftValue = other;
-            other.owns = false;
+            ( ( THIS_TYPE& ) other ).owns = false;
         }
         ~Borrower() {
             if( owns == true )
                 delete data;
         }
 
-        constexpr DATA_TYPE& operator*()
-        {
-            static_assert( owns == true, 
-                    "Borrow++::Error::Borrower::DATA_TYPE& operator*(): Attempt to refrence data "
-                    "when borrower doesent own the data.\n" );
-            return *data;
+        constexpr std::optional< std::reference_wrapper< DATA_TYPE > Refrence() {
+            if( owns == false )
+                return std::nullopt;
+            return std::optional< std::reference_wrapper< DATA_TYPE > >{ *data };
         }
-        constexpr DATA_TYPE* operator->()
-        {
-            static_assert( owns == true, 
-                    "Borrow++::Error::Borrower::DATA_TYPE& operator->(): Attempt to refrence data "
-                    "when borrower doesent own the data.\n" );
-            return data;
+
+        constexpr std::optional< std::reference_wrapper< DATA_TYPE > > operator*() {
+            return Refrence();
         }
 
         constexpr operator Refrence< DATA_TYPE >()
         {
-            static_assert( owns == true, 
-                    "Borrow++::Error::Borrower::operator Refrence(): Attempt to refrence data "
-                    "when borrower doesent own the data.\n" );
+            assert( ( "Borrow++::Error::Borrower::operator Refrence(): Attempt to refrence data "
+                    "when borrower doesent own the data.\n", owns == true ) );
             return Refrence< DATA_TYPE >{ *this };
         }
 
