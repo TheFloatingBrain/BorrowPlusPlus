@@ -9,6 +9,7 @@
 *.sav
 *.d
 *.exe
+*.bat
 
 ### Windows ###
 # Windows thumbnail cache files
