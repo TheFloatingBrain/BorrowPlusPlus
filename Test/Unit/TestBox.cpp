@@ -14,7 +14,7 @@ TEST_CASE( "Test boxes", "[box]" )
         Box< int > box = Borrow< int >{ testValue };
         BoxInspect( std::move( box ), testValue );
     }
-    SECTION( "Create a box and pass it to a function & a refrence, then inspect that value" )
+/*    SECTION( "Create a box and pass it to a function & a refrence, then inspect that value" )
     {
         GIVEN( "A box, a refrence and a random test value" )
         {
@@ -214,5 +214,5 @@ TEST_CASE( "Test boxes", "[box]" )
                 }
             }
         }
-    }
+    }*/
 }
