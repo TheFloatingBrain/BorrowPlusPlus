@@ -11,7 +11,7 @@
             //No floating pointers. This may become optional later, see "Goals".//
             constexpr Box() = delete;
             constexpr Box( const THIS_TYPE& other ) = delete;
-            constexpr Box( const THIS_TYPE&& other ) : data( other.data ), passed( false ) {
+            constexpr Box( const THIS_TYPE&& other ) : data( other.data ), passed( other.passed ) {
                 const Box& leftValue = other;
                 ( ( Box& ) leftValue ).passed = true;
             }
@@ -24,7 +24,7 @@
             BORROW_PLUS_PLUS_CORE_REFRENCE_OPERATORS_COMMON_DEFINITIONS_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8
 
             constexpr operator Refrence< DATA_TYPE >() {
-                return Refrence< DATA_TYPE >{ *this };
+                return Refrence< DATA_TYPE >{ data };
             }
 
             friend class Detail::BorrowBase< DATA_TYPE >;
