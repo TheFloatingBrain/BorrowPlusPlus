@@ -24,7 +24,7 @@ C++ borrow library with value semantics! This is very much a work in progress an
 
 ## Completed
 - [x] Fix moving and referencing unowned boxes.
-- [x] Fix the one foot-gun (the move semantics) that exists in this library. This may be able to be done via template specialization, instantiating owning/non-owning Boxes. I credit https://github.com/ZisIsNotZis/cppBorrow by ZisIsNotZis with that idea. Im basically adding implicit value semantics and garbage collection to his idea. 
+- [x] Fix the one foot-gun (the move semantics) that exists in this library. This may be able to be done via template specialization, instantiating owning/non-owning Boxes. I credit [cppBorrow by ZisIsNotZis](https://github.com/ZisIsNotZis/cppBorrow) with that idea. Im basically adding implicit value semantics and garbage collection to his idea. 
 - [x] Fix the one foot gun where it someone can write Box< DATA_TYPE > instead of OWNED_BOX< DATA_TYPE > when returning from a function.
 
 # Current Example (Other Examples of Borrowers Availible in /Examples)
@@ -69,7 +69,8 @@ int main( int argc, char** args )
     /*******************************************************
     * Parallel boxes existing in the same scope, this case *
     * must be very explicilty and purposfully done, but ****
-    * it can be done. *************************************/
+    * it can be done. **************************************
+    ********************************************************/
     Box< int > secondBox = std::move( firstBox );
     //Pass a non-owning refrence to the function.//
     Modify( firstBox );
