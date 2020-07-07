@@ -13,7 +13,7 @@
             #define BORROWER_COMMON_PUBLIC_BORROW_PLUS_PLUS_GUID_eb68f065_567d_437b_9373_9fa3e17e65a8 \
                     constexpr Borrower() = delete; \
                     constexpr Borrower( const THIS_TYPE& other ) = delete; \
-                    constexpr Borrower( const THIS_TYPE&& other ) : data( other.data ), owns( true ) { \
+                    constexpr Borrower( const THIS_TYPE&& other ) : data( other.data ), owns( other.owns ) { \
                         const THIS_TYPE& leftValue = other; \
                         ( ( THIS_TYPE& ) other ).owns = false; \
                     } \
