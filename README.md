@@ -10,11 +10,11 @@ C++ borrow library with value semantics! This is very much a work in progress an
 - [ ] Modularize
 - [ ] Fix interface too or eliminate "borrowers"
 - [ ] Differentiate between mutable & immutable
-- [ ] Use pointer-to-pointer types to allow for ubiquitous nullification, nullable/unnullable semantics patial optional manual memory managment, future garbage collector. 
+- [ ] Use pointer-to-pointer types to allow for ubiquitous nullification, nullable/unnullable semantics partial optional manual memory management, future garbage collector. 
 - [ ] Get rid of all STL headers
 - [ ] Make borrowing allocator aware.
 - [ ] Make "borrow vector/list/container"
-- [ ] Make suitable for use atomic-less with lock free programing
+- [ ] Make suitable for use atomic-less with lock free programming
 - [ ] Add stack/compile time allocator. 
 - [ ] Allow for thread safe or atomic storage. 
 - [ ] Allow for contiguous storage (array/buffer allocation). 
