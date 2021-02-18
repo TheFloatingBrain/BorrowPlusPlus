@@ -1,7 +1,6 @@
 # Borrow++
 
 C++ borrow library with value semantics! This is very much a work in progress and does not have a stable API. However I do provide examples and unit tests, so please gitfeel free to comment, or post issues.
-Project not dead!
 
 # Goals
 - [ ] Make copy/clone methods
